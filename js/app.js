@@ -22,10 +22,6 @@ let editando = false;
 // Eventos
 eventListeners();
 function eventListeners() {
-    // fotoInput.addEventListener('submit', e =>{
-    //     citaObj.foto = URL.createObjectURL(e);
-    //     console.log(fotoInput.value)
-    // })
     fotoInput.addEventListener('change', funcionfoto)
     mascotaInput.addEventListener('change', datosCita);
     propietarioInput.addEventListener('change', datosCita);
@@ -35,7 +31,7 @@ function eventListeners() {
     sintomasInput.addEventListener('change', datosCita);
 }
 
-const citaObj = {
+let citaObj = {
     foto:'',
     mascota: '',
     propietario: '',
@@ -44,24 +40,38 @@ const citaObj = {
     hora:'',
     sintomas: ''
 }
+let arrFotos=[]
 function funcionfoto(){
-    const foto=fotoInput.files[0]
-    citaObj.foto=foto
+    
+    const fotoVAR=fotoInput.files[0]
+    citaObj.foto=JSON.stringify(URL.createObjectURL(fotoVAR))
+    arrFotos.push(citaObj.foto)
+    arrFotos.forEach((er)=>{
+        citaObj.foto=localStorage.setItem('foto', arrFotos)
+        console.log(er  )
+    })
+    
+    
 }
 
 function datosCita(e) {
-    //  console.log(e.target.name) // Obtener el Input
+     console.log(e.target.name) // Obtener el Input
      citaObj[e.target.name] = e.target.value;
-     console.log(citaObj)
+     
 }
 
 // CLasses
 class Citas {
     constructor() {
         this.citas = []
+        this.citas=JSON.parse(localStorage.getItem('motos'))||[]
     }
     agregarCita(cita) {
         this.citas = [...this.citas, cita];
+        
+       
+      
+        
     }
     editarCita(citaActualizada) {
         this.citas = this.citas.map( cita => cita.id === citaActualizada.id ? citaActualizada : cita)
@@ -105,6 +115,12 @@ class UI {
 
         citas.forEach(cita => {
             const {foto, mascota, propietario, telefono, fecha, hora, sintomas, id } = cita;
+            
+            
+           
+
+
+
 
             const divCita = document.createElement('div');
             divCita.classList.add('cita', 'p-3');
@@ -112,7 +128,8 @@ class UI {
 
             // scRIPTING DE LOS ELEMENTOS...    
             const fotoContent=document.createElement('img')
-            fotoContent.src=URL.createObjectURL(foto)
+            // fotoContent.src=URL.createObjectURL(foto)
+            fotoContent.src=JSON.parse(localStorage.getItem('foto'))
             
 
             fotoContent.style.width="200px"
@@ -165,6 +182,9 @@ class UI {
             contenedorCitas.appendChild(divCita);
             
         });    
+        localStorage.setItem('motos', JSON.stringify(citas))
+        console.log(citas)
+        
    }
 
    limpiarHTML() {
@@ -181,6 +201,7 @@ function nuevaCita(e) {
     e.preventDefault();
 
     const {mascota, propietario, telefono, fecha, hora, sintomas } = citaObj;
+    
 
     // Validar
     if( mascota === '' || propietario === '' || telefono === '' || fecha === ''  || hora === '' || sintomas === '' ) {
@@ -207,12 +228,12 @@ function nuevaCita(e) {
         
         // Añade la nueva cita
         administrarCitas.agregarCita({...citaObj});
-
+        
         // Mostrar mensaje de que todo esta bien...
         ui.imprimirAlerta('Se agregó correctamente')
     }
 
-
+    
     // Imprimir el HTML de citas
     ui.imprimirCitas(administrarCitas);
 
@@ -232,6 +253,7 @@ function reiniciarObjeto() {
     citaObj.fecha = '';
     citaObj.hora = '';
     citaObj.sintomas = '';
+    
 }
 
 
@@ -244,7 +266,7 @@ function eliminarCita(id) {
 function cargarEdicion(cita) {
 
     const {mascota, propietario, telefono, fecha, hora, sintomas, id } = cita;
-
+    
     // Reiniciar el objeto
     citaObj.mascota = mascota;
     citaObj.propietario = propietario;
@@ -267,3 +289,7 @@ function cargarEdicion(cita) {
     editando = true;
 
 }
+
+
+
+
